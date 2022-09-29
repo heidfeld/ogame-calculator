@@ -20,7 +20,7 @@ const Indicator = (props) => {
 
     return (
         <div>
-            <input type="number"value={value} onChange={handleValueChange}/>
+            <input type="number"value={value} onBlur={handleValueChange}/>
             {renderAddButton()}
         </div>
     );
