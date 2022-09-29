@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 const Indicator = (props) => {
-    const {value = 0, onChange, id, onAdd} = props;
+    const {value = 0, onChange, id, onAdd, onBlur} = props;
 
     const handleValueChange = useCallback((event) => {
         onChange?.(id, event?.target?.value);
@@ -18,9 +18,13 @@ const Indicator = (props) => {
         return null;
     }, [handleAdd, onAdd]);
 
+    const handleBlur = useCallback(() => {
+        onBlur?.(id, value);
+    }, [onBlur, id, value]);
+
     return (
         <div>
-            <input type="number"value={value} onBlur={handleValueChange}/>
+            <input type="number"value={value} onChange={handleValueChange} onBlur={handleBlur}/>
             {renderAddButton()}
         </div>
     );

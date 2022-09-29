@@ -1,9 +1,11 @@
 import { useCallback, useMemo, useState } from "react";
 import Indicator from "../indicator/Indicator";
 
+import './css/calculator.css';
+
 const CalculatorColumn = (props) => {
 
-    const {columnId} = props;
+    const {columnId, title} = props;
 
     const [dividersConfig, setDividersConfig] = useState({});
     const [goalValue, setGoalValue] = useState(0);
@@ -23,14 +25,31 @@ const CalculatorColumn = (props) => {
         });
     }, []);
 
+    const calculateGoalValue = useCallback((prevGoalValue) => {
+        const sum = Object.values(dividersConfig).reduce((acc, curr) => acc + curr, 0);
+        return prevGoalValue - sum;
+    }, [dividersConfig]);
+
+    const onDividerBlur = useCallback((id) => {
+        if (id) {
+            setGoalValue(prevGoalValue => calculateGoalValue(prevGoalValue));
+        }
+    }, [calculateGoalValue]);
+
+    const onHeaderIndicatorBlur = useCallback((id, value) => {
+        if (id) {
+            setGoalValue(calculateGoalValue(value));
+        }
+    }, [calculateGoalValue]);
+
     const renderDividers = useCallback(() => {
         return Object.entries(dividersConfig).map((entry) => {
             const [key, value] = entry;
             return (
-                <Indicator key={key} id={key} onChange={onValueChange} value={value}/>
+                <Indicator key={key} id={key} onChange={onValueChange} value={value} onBlur={onDividerBlur}/>
             );
         });
-    }, [dividersConfig, onValueChange]);
+    }, [dividersConfig, onValueChange, onDividerBlur]);
 
     const getKey = useCallback((id) => {
         return `${columnId}_${id}`;
@@ -48,17 +67,14 @@ const CalculatorColumn = (props) => {
         })
     }, [getKey]);
 
-    const dividersSum = useMemo(() => {
-        return Object.values(dividersConfig).reduce((acc, curr) => acc + curr, 0);
-    }, [dividersConfig]);
-
-    const remainingSum = useMemo(() => {
-        return goalValue - dividersSum;
-    }, [dividersSum, goalValue]);
+    const headerIndicatorId = useMemo(() => {
+        return `${columnId}_HEADER_INDICATOR`;
+    }, [columnId]);
 
     return (
-        <div>
-            <Indicator onChange={onHeaderIndicatorChange} onAdd={onAdd} value={remainingSum}/>
+        <div className="calculator-column">
+            {title}
+            <Indicator id={headerIndicatorId} onChange={onHeaderIndicatorChange} onAdd={onAdd} value={goalValue} onBlur={onHeaderIndicatorBlur}/>
             <hr></hr>
             {renderDividers()}
         </div>
